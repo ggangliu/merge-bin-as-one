@@ -4,7 +4,7 @@ This tool is for merge all bin as one file. Avoiding wasting of time at burning 
 
 from struct import pack
 import os
-
+from tqdm import tqdm,trange
 
 __version__ = "0.1"
 bin_map_info = []
@@ -19,11 +19,11 @@ with open('address-map.ini') as config_file:
     finally:
         config_file.close()
     
-print(bin_map_info)
+#print(bin_map_info)
 
 #Creating a file which is filled by binary 1 and its size is the same with flash of DOT
 with open('One-Entire-Image.bin', 'wb') as one_image:
-    for i in range(0xffffff):
+    for i in trange(0xffffff):
         one_image.write(pack('B', 255))
     one_image.close()
 
@@ -31,8 +31,10 @@ with open('One-Entire-Image.bin', 'wb') as one_image:
 #Second step:
 #According to these infomations to get the related file and read out it as binary format.
 #Then write its into the file which is deemed as the flash. Do it one by one.
-for item_bin in bin_map_info:
+pbar = tqdm(bin_map_info)
+for item_bin in pbar:
     image_name, image_addr, image_len = item_bin
+    pbar.set_description("Processing %s" % image_name)
     #print(image_name, image_addr, image_len)
     if not os.path.exists('full-loads/'+image_name):
         print("Warning: %s isn't exist!!!!" % ('full-loads/'+image_name))
@@ -51,7 +53,7 @@ for item_bin in bin_map_info:
             target_F.write(bin_content)
             target_F.flush()
             target_F.close()
-            print("Adding %s successed. " % image_name)
+            #print(" successed.")
 
 os.system("pause")
 
